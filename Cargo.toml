@@ -10,8 +10,10 @@ anyhow = "1.0.66"
 base64 = "0.13.1"
 clap = { version = "4.0.29", features = ["derive"] }
 eframe = "0.20.0"
+lazy_async_promise = "0.3.1"
 rand_core = { version = "0.6.4", features = ["getrandom"] }
 serde = { version = "1.0.149", features = ["derive"] }
 thiserror = "1.0.37"
 tinytemplate = "1.2.1"
+tokio = { version = "1.23.0", features = ["rt-multi-thread", "sync", "macros", "process", "io-util"] }
 x25519-dalek = { version = "2.0.0-pre.1", features = ["serde"] }
