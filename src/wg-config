@@ -1,0 +1,9 @@
+[Interface]
+PrivateKey = { secret_key }
+Address = 10.11.0.4/24
+
+[Peer]
+PublicKey = +0wn/liL7hqQoCfiSwtonUlZ8YKeGkBV4ZMqpt7s8DQ=
+AllowedIPs = 10.11.0.0/24
+Endpoint = 20.79.26.196:51820
+PersistentKeepalive = 25
