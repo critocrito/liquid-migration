@@ -5,6 +5,11 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[target.x86_64-unknown-linux-musl]
+linker = "x86_64-linux-musl-gcc"
+[target.i686-unknown-linux-musl]
+linker = "i486-linux-musl-gcc -arch i386"
+
 [dependencies]
 anyhow = "1.0.66"
 base64 = "0.13.1"
