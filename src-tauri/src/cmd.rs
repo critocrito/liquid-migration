@@ -1,7 +1,9 @@
-use lazy_async_promise::ImmediateValuePromise;
-use std::{io::Error as IoError, process::Stdio, str};
+use std::{
+    io::{Error as IoError, Write},
+    process::{Command, Stdio},
+    str,
+};
 use thiserror::Error;
-use tokio::{io::AsyncWriteExt, process::Command};
 
 #[derive(Error, Debug)]
 pub(crate) enum CmdError {
@@ -11,7 +13,7 @@ pub(crate) enum CmdError {
     Sudo(String),
 }
 
-pub(crate) async fn test_sudo(password: &str) -> std::result::Result<(), CmdError> {
+pub(crate) fn test_sudo(password: &str) -> Result<(), CmdError> {
     let mut child = Command::new("sudo")
         .arg("-S")
         .arg("-k")
@@ -22,11 +24,11 @@ pub(crate) async fn test_sudo(password: &str) -> std::result::Result<(), CmdErro
 
     let child_stdin = child.stdin.as_mut();
     if let Some(stdin) = child_stdin {
-        stdin.write_all(password.as_bytes()).await?;
-        stdin.write_all(b"\n").await?;
+        stdin.write_all(password.as_bytes())?;
+        stdin.write_all(b"\n")?;
     }
 
-    let output = child.wait_with_output().await?;
+    let output = child.wait_with_output()?;
 
     if output.status.success() {
         Ok(())
@@ -35,7 +37,7 @@ pub(crate) async fn test_sudo(password: &str) -> std::result::Result<(), CmdErro
     }
 }
 
-pub(crate) async fn sudo_uname(password: &str) -> std::result::Result<String, CmdError> {
+pub(crate) fn sudo_uname(password: &str) -> Result<String, CmdError> {
     let mut child = Command::new("sudo")
         .arg("-S")
         .arg("-k")
@@ -47,11 +49,11 @@ pub(crate) async fn sudo_uname(password: &str) -> std::result::Result<String, Cm
 
     let child_stdin = child.stdin.as_mut();
     if let Some(stdin) = child_stdin {
-        stdin.write_all(password.as_bytes()).await?;
-        stdin.write_all(b"\n").await?;
+        stdin.write_all(password.as_bytes())?;
+        stdin.write_all(b"\n")?;
     }
 
-    let output = child.wait_with_output().await?;
+    let output = child.wait_with_output()?;
 
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout).to_string())
@@ -62,10 +64,8 @@ pub(crate) async fn sudo_uname(password: &str) -> std::result::Result<String, Cm
     }
 }
 
-pub fn setup_vpn(password: String) -> ImmediateValuePromise<()> {
-    ImmediateValuePromise::new(async move {
-        test_sudo(&password).await?;
-        sudo_uname(&password).await?;
-        Ok(())
-    })
+pub(crate) fn setup_vpn(password: &str) -> Result<String, CmdError> {
+    test_sudo(&password)?;
+    let uname = sudo_uname(&password)?;
+    Ok(uname)
 }
