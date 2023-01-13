@@ -6,47 +6,61 @@
 
 Install a recent version of the the Rust compiler (minimum 1.57). The recommended way to install Rust is by using [`rustup`](https://rustup.rs).
 
-``` sh
+```sh
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 rustc --version
 ```
 
 Also setup the [Tauri](https://tauri.app) toolchain.
 
-``` sh
+```sh
 cargo install tauri-cli
 ```
 
 And install the [NodeJS compiler](https://nodejs.org/en/download/) and dependencies:
 
-``` sh
+```sh
 cd liquid-migrations
 npm install
 ```
 
 During development run:
 
-``` sh
+```sh
 cargo tauri dev
 ```
 
 Build the production release using the following command:
 
-``` sh
+```sh
 cargo tauri build
 ```
 
 The binary can be found in `target/release`:
 
-``` sh
+```sh
 ls -l target/release/liquid-migration
 ```
+
+## Development
+
+To start the app during development run:
+
+```sh
+cargo tauri dev
+```
+
+There are various scripts that verify code quality:
+
+- `npm run lint` : Check the code quality of the Typescript and Rust code.
+- `npm run fix` : Fix any code quality issues that can be automated.
+- `npm run watch` : Run various code quality checkers in watch mode.
 
 ## Cross Compile using macOS targeting generic Linux systems using static binaries
 
 To build a cross compiled static musl version using a macOS based system, e.g. targeting x86_64 (64bit linux) or x86 (32bit linux like Tails) run:
 
-``` sh
+```sh
 # add rust x86_64 target
 rustup target add x86_64-unknown-linux-musl
 # add rust x86 target
