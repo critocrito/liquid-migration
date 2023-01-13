@@ -65,7 +65,7 @@ pub(crate) fn sudo_uname(password: &str) -> Result<String, CmdError> {
 }
 
 pub(crate) fn setup_vpn(password: &str) -> Result<String, CmdError> {
-    test_sudo(&password)?;
-    let uname = sudo_uname(&password)?;
+    test_sudo(password)?;
+    let uname = sudo_uname(password)?;
     Ok(uname)
 }

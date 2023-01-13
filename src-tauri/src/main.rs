@@ -58,13 +58,12 @@ fn wg_config() -> WireguardMessage {
 
 #[tauri::command]
 fn uname(password: &str) -> UnameMessage {
-    let uname = match cmd::setup_vpn(password) {
+    match cmd::setup_vpn(password) {
         Ok(msg) => UnameMessage::Uname { uname: msg },
         Err(e) => UnameMessage::CommandError {
             message: e.to_string(),
         },
-    };
-    uname
+    }
 }
 
 #[tauri::command]

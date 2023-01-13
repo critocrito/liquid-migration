@@ -5,7 +5,7 @@ use thiserror::Error;
 use tinytemplate::{error::Error as TinyTemplateError, TinyTemplate};
 use x25519_dalek::{PublicKey, StaticSecret};
 
-static TEMPLATE: &'static str = include_str!("./wg-config");
+static TEMPLATE: &str = include_str!("./wg-config");
 
 #[derive(Error, Debug)]
 pub enum WgError {
