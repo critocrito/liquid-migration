@@ -1,0 +1,11 @@
+{
+  "project": "My Project",
+  "vpn_server": {
+    "host": "10.0.11.1",
+    "public_key": "my-public-key"
+  },
+  "client": {
+    "ferm_config": "/etc/ferm.d/ferm.conf",
+    "wg_config": "/etc/wg0/wg.conf"
+  }
+}

@@ -44,3 +44,6 @@ __pycache__
 # direnv
 .envrc
 .direnv
+
+# app
+app-config.json

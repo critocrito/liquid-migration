@@ -614,6 +614,7 @@ dependencies = [
  "anyhow",
  "base64",
  "clap",
+ "lazy_static",
  "rand_core 0.6.4",
  "serde",
  "serde_json",

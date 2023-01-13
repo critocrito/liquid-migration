@@ -4,6 +4,7 @@
 )]
 use serde::Serialize;
 
+mod cfg;
 mod cmd;
 mod wg;
 
@@ -27,6 +28,16 @@ enum UnameMessage {
     Uname { uname: String },
     #[serde(rename = "error")]
     CommandError { message: String },
+}
+
+#[derive(Debug, Serialize)]
+#[serde(tag = "type")]
+enum AppConfigMessage {
+    #[serde(rename = "success")]
+    AppConfig {
+        #[serde(flatten)]
+        cfg: cfg::AppConfig,
+    },
 }
 
 #[tauri::command]
@@ -56,9 +67,16 @@ fn uname(password: &str) -> UnameMessage {
     uname
 }
 
+#[tauri::command]
+fn app_config() -> AppConfigMessage {
+    AppConfigMessage::AppConfig {
+        cfg: (*cfg::APP_CONFIG).clone(),
+    }
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![wg_config, uname])
+        .invoke_handler(tauri::generate_handler![wg_config, uname, app_config])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

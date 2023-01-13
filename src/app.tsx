@@ -18,9 +18,16 @@ type WireguardConfig = {
 };
 
 type Uname = {type: "success"; uname: string};
+type AppConfig = {
+  type: "success";
+  project: string;
+  vpn_server: {host: string; public_key: string};
+  client: {ferm_config: string; wg_config: string};
+};
 
 type WireguardMessage = WireguardConfig | CommandError;
 type UnameMessage = Uname | CommandError;
+type AppConfigMessage = AppConfig;
 
 type Error = {id: number; handler: string; message: string};
 
@@ -28,6 +35,7 @@ const App = () => {
   const [password, setPassword] = useState<string>("");
   const [uname, setUname] = useState<UnameMessage>();
   const [wgConfig, setWgConfig] = useState<WireguardMessage>();
+  const [appConfig, setAppConfig] = useState<AppConfigMessage>();
   const [errors, setErrors] = useState<Error[]>([]);
 
   const invokeUname = async () => {
@@ -64,16 +72,26 @@ const App = () => {
     }
   };
 
+  const invokeAppConfig = async () => {
+    const response = await invoke<AppConfigMessage>("app_config", {});
+
+    if (response.type === "success") {
+      setAppConfig(response);
+    }
+  };
+
   const handleRun = async () => {
     setErrors([]);
     invokeUname();
     invokeWgConfig();
+    invokeAppConfig();
   };
 
   const handleReset = () => {
     setPassword("");
     setUname(undefined);
     setWgConfig(undefined);
+    setAppConfig(undefined);
     setErrors([]);
   };
 
@@ -139,6 +157,10 @@ const App = () => {
             </li>
           ))}
         </ul>
+      )}
+
+      {appConfig && appConfig.type === "success" && (
+        <p>App Config: {appConfig.project}</p>
       )}
 
       {uname && uname.type === "success" && <p>Host Uname: {uname.uname}</p>}
