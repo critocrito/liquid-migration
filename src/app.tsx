@@ -3,7 +3,8 @@ import "./style.css";
 import {invoke} from "@tauri-apps/api/tauri";
 import React, {useState} from "react";
 
-import Button from "./components/button";
+import Button from "$components/button";
+import Onboarding from "$components/onboarding";
 
 type CommandError = {
   type: "error";
@@ -148,6 +149,10 @@ const App = () => {
           </div>
         </div>
       </form>
+
+      <h2>Onboarding State Machine</h2>
+
+      <Onboarding />
 
       {errors.length > 0 && (
         <ul>
