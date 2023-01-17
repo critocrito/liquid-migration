@@ -29,7 +29,7 @@ export default createMachine({
 
     ssl: {
       on: {
-        NEXT: {target: "done"},
+        NEXT: {target: "other"},
       },
     },
 

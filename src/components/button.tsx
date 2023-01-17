@@ -7,6 +7,7 @@ interface ButtonProps {
   type?: "primary" | "secondary";
   disabled?: boolean;
   className?: string;
+  ref?: React.MutableRefObject<null>;
 }
 
 const Button = ({
@@ -15,12 +16,14 @@ const Button = ({
   type = "primary",
   disabled = false,
   className,
+  ref,
 }: ButtonProps) => {
   return (
     <button
       type="button"
       disabled={disabled}
       onClick={onClick}
+      ref={ref}
       className={c(
         "rounded-md py-2 px-4 text-sm font-medium shadow-sm disabled:opacity-50 disabled:pointer-none",
         "focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",

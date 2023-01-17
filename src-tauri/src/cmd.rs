@@ -64,6 +64,26 @@ pub(crate) fn sudo_uname(password: &str) -> Result<String, CmdError> {
     }
 }
 
+#[cfg(target_os = "linux")]
+pub(crate) fn verify_wireguard_pkg() -> Result<(), CmdError> {
+    let mut child = Command::new("dpkg")
+        .arg("-s")
+        .arg("wireguard")
+        .spawn()
+        .expect("failed to spawn");
+
+    let _ = child.wait().await?;
+
+    Ok(())
+}
+
+#[cfg(target_os = "macos")]
+pub(crate) fn verify_wireguard_pkg() -> Result<(), CmdError> {
+    // Err(CmdError::Sudo("Boom!".to_string()))
+    std::thread::sleep(std::time::Duration::from_millis(3000));
+    Ok(())
+}
+
 pub(crate) fn setup_vpn(password: &str) -> Result<String, CmdError> {
     test_sudo(password)?;
     let uname = sudo_uname(password)?;

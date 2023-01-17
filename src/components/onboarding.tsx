@@ -32,6 +32,15 @@ const Onboarding = () => {
     );
   }
 
+  if (state.matches("other")) {
+    console.log(state, state.matches("other"), state.matches("other.one"));
+    return (
+      <div>
+        SSL: <Button onClick={() => send("NEXT")} label="Next" />
+      </div>
+    );
+  }
+
   if (state.matches("done")) {
     return <div>Done</div>;
   }

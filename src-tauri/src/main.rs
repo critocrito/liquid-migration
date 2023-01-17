@@ -40,6 +40,17 @@ enum AppConfigMessage {
     },
 }
 
+#[derive(Debug, Serialize)]
+#[serde(tag = "type")]
+enum HostSetupMessage {
+    #[serde(rename = "success")]
+    Setup,
+    #[serde(rename = "waiting")]
+    Poll,
+    #[serde(rename = "error")]
+    CommandError { message: String },
+}
+
 #[tauri::command]
 fn wg_config() -> WireguardMessage {
     let wireguard = wg::Wireguard::new();
@@ -73,9 +84,19 @@ fn app_config() -> AppConfigMessage {
     }
 }
 
+#[tauri::command]
+fn host_setup() -> HostSetupMessage {
+    match cmd::verify_wireguard_pkg() {
+        Ok(_) => HostSetupMessage::Setup,
+        Err(_) => HostSetupMessage::Poll,
+    }
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![wg_config, uname, app_config])
+        .invoke_handler(tauri::generate_handler![
+            wg_config, uname, app_config, host_setup
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -7,6 +7,7 @@
     "build": "tsc && vite build",
     "dev": "vite",
     "fix": "run-p --aggregate-output --continue-on-error lint:*:fix",
+    "postinstall": "run-s typestates",
     "lint": "run-p --aggregate-output --continue-on-error 'lint:**:!(fix)'",
     "lint:eslint": "eslint --ignore-path .gitignore --ignore-path .eslintignore .",
     "lint:eslint:fix": "npm run lint:eslint -- --fix",
@@ -30,14 +31,18 @@
     "watch:js:tsc": "tsc -b -w",
     "watch:rust": "run-p --continue-on-error watch:rust:check:* watch:rust:clippy:*",
     "watch:rust:check": "cd src-tauri && cargo watch -x check",
-    "watch:rust:clippy": "cd src-tauri && cargo watch -x clippy"
+    "watch:rust:clippy": "cd src-tauri && cargo watch -x clippy",
+    "xstates": "xstate typegen \"./src/**/*.ts?(x)\""
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.7",
+    "@heroicons/react": "^2.0.13",
     "@tauri-apps/api": "^1.2.0",
     "@xstate/react": "^3.0.2",
     "clsx": "^1.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-spinners": "^0.13.7",
     "xstate": "^4.35.2"
   },
   "devDependencies": {
@@ -49,6 +54,7 @@
     "@typescript-eslint/eslint-plugin": "^5.48.1",
     "@typescript-eslint/parser": "^5.48.1",
     "@vitejs/plugin-react": "^3.0.0",
+    "@xstate/cli": "^0.4.2",
     "autoprefixer": "^10.4.13",
     "eslint": "^8.31.0",
     "eslint-config-airbnb": "^19.0.4",
