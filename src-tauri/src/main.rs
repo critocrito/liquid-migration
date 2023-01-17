@@ -13,15 +13,6 @@ mod wg;
 
 #[derive(Debug, Serialize)]
 #[serde(tag = "type")]
-enum UnameMessage {
-    #[serde(rename = "success")]
-    Uname { uname: String },
-    #[serde(rename = "error")]
-    CommandError { message: String },
-}
-
-#[derive(Debug, Serialize)]
-#[serde(tag = "type")]
 enum AppConfigMessage {
     #[serde(rename = "success")]
     AppConfig {
@@ -37,8 +28,6 @@ enum HostSetupMessage {
     Setup,
     #[serde(rename = "waiting")]
     Poll,
-    #[serde(rename = "error")]
-    CommandError { message: String },
 }
 
 #[derive(Debug, Serialize)]
@@ -60,8 +49,17 @@ enum TemplateMessage {
     CommandError { message: String },
 }
 
+#[derive(Debug, Serialize)]
+#[serde(tag = "type")]
+enum PatchSystemMessage {
+    #[serde(rename = "success")]
+    Patched,
+    #[serde(rename = "error")]
+    CommandError { message: String },
+}
+
 #[tauri::command]
-fn wg_keys(cfg: State<AppState>) -> WireguardMessage {
+fn wg_keys() -> WireguardMessage {
     let wireguard = wg::Wireguard::new();
 
     WireguardMessage::WireguardConfig {
@@ -105,13 +103,10 @@ fn templates(pubkey: &str, privkey: &str, state: State<AppState>) -> TemplateMes
         }
     };
 
-    match fs::create_dir(&state.cfg.client.cfg_dir) {
-        _ => {}
-        Err(e) => {
-            if e.kind() != ErrorKind::AlreadyExists {
-                let msg = e.to_string();
-                return TemplateMessage::CommandError { message: msg };
-            }
+    if let Err(e) = fs::create_dir(&state.cfg.client.cfg_dir) {
+        if e.kind() != ErrorKind::AlreadyExists {
+            let msg = e.to_string();
+            return TemplateMessage::CommandError { message: msg };
         }
     };
 
@@ -138,16 +133,6 @@ fn templates(pubkey: &str, privkey: &str, state: State<AppState>) -> TemplateMes
 }
 
 #[tauri::command]
-fn uname(password: &str) -> UnameMessage {
-    match cmd::setup_vpn(password) {
-        Ok(msg) => UnameMessage::Uname { uname: msg },
-        Err(e) => UnameMessage::CommandError {
-            message: e.to_string(),
-        },
-    }
-}
-
-#[tauri::command]
 fn app_config(state: State<AppState>) -> AppConfigMessage {
     AppConfigMessage::AppConfig {
         cfg: state.cfg.clone(),
@@ -160,6 +145,55 @@ fn host_setup() -> HostSetupMessage {
         Ok(_) => HostSetupMessage::Setup,
         Err(_) => HostSetupMessage::Poll,
     }
+}
+
+#[tauri::command]
+fn patch_system(password: &str, state: State<AppState>) -> PatchSystemMessage {
+    let mut wg_conf_path = state.cfg.client.cfg_dir.clone();
+    let mut ferm_patch_path = state.cfg.client.cfg_dir.clone();
+    let mut browser_patch_path = state.cfg.client.cfg_dir.clone();
+
+    wg_conf_path.push("wg0.conf");
+    ferm_patch_path.push("ferm.conf.patch");
+    browser_patch_path.push("unsafe-browser.patch");
+
+    if let Err(_) = cmd::test_sudo(password) {
+        return PatchSystemMessage::CommandError {
+            message: "Administrator password failed.".to_string(),
+        };
+    }
+
+    if let Err(e) = cmd::sudo_patch_file(
+        password,
+        &ferm_patch_path.to_string_lossy(),
+        &state.cfg.client.ferm_config,
+    ) {
+        return PatchSystemMessage::CommandError {
+            message: e.to_string(),
+        };
+    }
+
+    if let Err(e) = cmd::sudo_patch_file(
+        password,
+        &browser_patch_path.to_string_lossy(),
+        &state.cfg.client.unsafe_browser,
+    ) {
+        return PatchSystemMessage::CommandError {
+            message: e.to_string(),
+        };
+    }
+
+    if let Err(e) = cmd::sudo_copy_file(
+        password,
+        &wg_conf_path.to_string_lossy(),
+        &state.cfg.client.wg_config,
+    ) {
+        return PatchSystemMessage::CommandError {
+            message: e.to_string(),
+        };
+    }
+
+    PatchSystemMessage::Patched
 }
 
 #[derive(Debug)]
@@ -179,7 +213,11 @@ fn main() {
     tauri::Builder::default()
         .manage(AppState::new())
         .invoke_handler(tauri::generate_handler![
-            wg_keys, uname, app_config, host_setup, templates
+            wg_keys,
+            app_config,
+            host_setup,
+            templates,
+            patch_system
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

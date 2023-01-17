@@ -1,5 +1,5 @@
 use serde::Serialize;
-use std::{fmt, include_str, net::Ipv4Addr, str};
+use std::{include_str, net::Ipv4Addr, str};
 use thiserror::Error;
 use tinytemplate::{error::Error as TinyTemplateError, TinyTemplate};
 

@@ -12,6 +12,10 @@ export type ActionDelay = {
   message?: string;
 };
 
+export type EmptyAction = {
+  type: "success";
+};
+
 export type AppAction = {
   type: "success";
   project: string;
@@ -29,14 +33,11 @@ type WireguardAction = {
   private_key: string;
 };
 
-export type TemplatesAction = {
-  type: "success";
-};
-
 export type AppActionMessage = AppAction | ActionError;
 export type HostActionMessage = HostAction | ActionDelay | ActionError;
 export type WireguardActionMessage = WireguardAction | ActionError;
-export type TemplatesActionMessage = TemplatesAction | ActionError;
+export type TemplatesActionMessage = EmptyAction | ActionError;
+export type PatchingActionMessage = EmptyAction | ActionError;
 
 export const appAction = async (): Promise<AppConfig> => {
   const resp = await invoke<AppActionMessage>("app_config", {});
@@ -87,6 +88,14 @@ export const templatesAction = async (
     privkey: privateKey,
     pubkey: publicKey,
   });
+
+  if (resp.type === "error") {
+    throw new Error(resp.message);
+  }
+};
+
+export const patchingAction = async (password: string): Promise<void> => {
+  const resp = await invoke<TemplatesActionMessage>("patch_system", {password});
 
   if (resp.type === "error") {
     throw new Error(resp.message);

@@ -3,6 +3,7 @@ import c from "clsx";
 import React from "react";
 
 import Onboarding from "$components/onboarding";
+import Start from "$components/start";
 import useServiceLogger from "$lib/hooks/service-logger";
 import {unreachable} from "$lib/utils";
 import machine from "$machines/tasks";
@@ -25,11 +26,21 @@ const Loaded = () => {
         >
           Onboarding
         </button>
+
+        <button
+          onClick={() => send("START")}
+          type="button"
+          className={c(btnClassName)}
+        >
+          Start
+        </button>
       </div>
     );
 
   if (state.matches("onboarding"))
     return <Onboarding onCancel={() => send("CANCEL")} />;
+
+  if (state.matches("start")) return <Start onCancel={() => send("CANCEL")} />;
 
   return unreachable(`State ${state} not found`);
 };

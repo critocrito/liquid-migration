@@ -12,6 +12,10 @@ fn default_wg() -> String {
     "/etc/wireguard/wg0.conf".to_string()
 }
 
+fn default_unsafe_browser() -> String {
+    "/usr/local/sbin/unsafe-browser".to_string()
+}
+
 fn default_cfg_dir() -> PathBuf {
     PathBuf::from_str("/live/persistence/TailsData_unlocked/.liquid").unwrap()
 }
@@ -30,6 +34,8 @@ pub(crate) struct Client {
     pub(crate) ferm_config: String,
     #[serde(default = "default_wg")]
     pub(crate) wg_config: String,
+    #[serde(default = "default_unsafe_browser")]
+    pub(crate) unsafe_browser: String,
     #[serde(default = "default_cfg_dir")]
     pub(crate) cfg_dir: PathBuf,
 }
@@ -39,6 +45,7 @@ impl Default for Client {
         Self {
             ferm_config: default_ferm(),
             wg_config: default_wg(),
+            unsafe_browser: default_unsafe_browser(),
             cfg_dir: default_cfg_dir(),
         }
     }

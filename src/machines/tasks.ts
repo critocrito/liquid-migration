@@ -1,7 +1,7 @@
 import {createMachine} from "xstate";
 
 type Context = Record<string, unknown>;
-type Event = {type: "ONBOARD"} | {type: "CANCEL"};
+type Event = {type: "ONBOARD"} | {type: "START"} | {type: "CANCEL"};
 
 export default createMachine({
   tsTypes: {} as import("./tasks.typegen").Typegen0,
@@ -21,10 +21,17 @@ export default createMachine({
     init: {
       on: {
         ONBOARD: {target: "onboarding"},
+        START: {target: "start"},
       },
     },
 
     onboarding: {
+      on: {
+        CANCEL: {target: "init"},
+      },
+    },
+
+    start: {
       on: {
         CANCEL: {target: "init"},
       },

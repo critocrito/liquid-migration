@@ -8,6 +8,7 @@ interface ContentProps {
   onNext: () => void;
   onCancel?: () => void;
   isFinal?: boolean;
+  isDisabled?: boolean;
 }
 
 const Content = ({
@@ -17,6 +18,7 @@ const Content = ({
   onCancel,
   children,
   isFinal = false,
+  isDisabled = false,
 }: React.PropsWithChildren<ContentProps>) => {
   return (
     <div className="space-y-8 divide-y divide-gray-200">
@@ -43,6 +45,7 @@ const Content = ({
 
           <Button
             onClick={onNext}
+            disabled={isDisabled}
             label={isFinal ? "Done" : "Next"}
             className="ml-3 inline-flex justify-center"
           />
