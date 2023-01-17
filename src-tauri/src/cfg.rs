@@ -1,6 +1,5 @@
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-use std::{path::PathBuf, str::FromStr};
 
 const CFG_JSON: &str = include_str!("../../resources/app-config.json");
 
@@ -16,12 +15,12 @@ fn default_unsafe_browser() -> String {
     "/usr/local/sbin/unsafe-browser".to_string()
 }
 
-fn default_cfg_dir() -> PathBuf {
-    PathBuf::from_str("/live/persistence/TailsData_unlocked/.liquid").unwrap()
+fn default_cfg_dir() -> String {
+    "/live/persistence/TailsData_unlocked/.liquid".to_string()
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub(crate) struct VpnServer {
+pub(crate) struct Server {
     pub(crate) host: std::net::Ipv4Addr,
     pub(crate) endpoint: std::net::Ipv4Addr,
     pub(crate) public_key: String,
@@ -37,7 +36,7 @@ pub(crate) struct Client {
     #[serde(default = "default_unsafe_browser")]
     pub(crate) unsafe_browser: String,
     #[serde(default = "default_cfg_dir")]
-    pub(crate) cfg_dir: PathBuf,
+    pub(crate) cfg_dir: String,
 }
 
 impl Default for Client {
@@ -54,7 +53,7 @@ impl Default for Client {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub(crate) struct AppConfig {
     pub(crate) project: String,
-    pub(crate) vpn_server: VpnServer,
+    pub(crate) server: Server,
     #[serde(default)]
     pub(crate) client: Client,
 }

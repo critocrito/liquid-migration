@@ -19,8 +19,13 @@ export type EmptyAction = {
 export type AppAction = {
   type: "success";
   project: string;
-  vpn_server: {host: string; public_key: string};
-  client: {ferm_config: string; wg_config: string};
+  server: {host: string; network: string; endpoint: string; public_key: string};
+  client: {
+    ferm_config: string;
+    wg_config: string;
+    unsafe_browser: string;
+    cfg_dir: string;
+  };
 };
 
 export type HostAction = {
@@ -48,7 +53,7 @@ export const appAction = async (): Promise<AppConfig> => {
 
   return {
     project: resp.project,
-    server: resp.vpn_server,
+    server: resp.server,
     client: resp.client,
   };
 };

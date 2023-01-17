@@ -3,7 +3,7 @@
     windows_subsystem = "windows"
 )]
 use serde::Serialize;
-use std::{fs, io::ErrorKind};
+use std::{fs, io::ErrorKind, path::Path};
 use tauri::State;
 
 mod cfg;
@@ -72,10 +72,10 @@ fn wg_keys() -> WireguardMessage {
 fn templates(pubkey: &str, privkey: &str, state: State<AppState>) -> TemplateMessage {
     let wg_template = match templates::wg_config(
         privkey,
-        &state.cfg.vpn_server.public_key,
-        &state.cfg.vpn_server.host,
-        &state.cfg.vpn_server.endpoint,
-        &state.cfg.vpn_server.network,
+        &state.cfg.server.public_key,
+        &state.cfg.server.host,
+        &state.cfg.server.endpoint,
+        &state.cfg.server.network,
     ) {
         Ok(tmpl) => tmpl,
         Err(e) => {
@@ -85,7 +85,7 @@ fn templates(pubkey: &str, privkey: &str, state: State<AppState>) -> TemplateMes
         }
     };
 
-    let ferm_template = match templates::ferm_patch(&state.cfg.vpn_server.endpoint) {
+    let ferm_template = match templates::ferm_patch(&state.cfg.server.endpoint) {
         Ok(tmpl) => tmpl,
         Err(e) => {
             return TemplateMessage::CommandError {
@@ -94,7 +94,7 @@ fn templates(pubkey: &str, privkey: &str, state: State<AppState>) -> TemplateMes
         }
     };
 
-    let browser_template = match templates::browser_patch(&state.cfg.vpn_server.endpoint) {
+    let browser_template = match templates::browser_patch(&state.cfg.server.endpoint) {
         Ok(tmpl) => tmpl,
         Err(e) => {
             return TemplateMessage::CommandError {
@@ -110,24 +110,18 @@ fn templates(pubkey: &str, privkey: &str, state: State<AppState>) -> TemplateMes
         }
     };
 
-    let mut wg_template_path = state.cfg.client.cfg_dir.clone();
-    let mut ferm_template_path = state.cfg.client.cfg_dir.clone();
-    let mut browser_template_path = state.cfg.client.cfg_dir.clone();
-    let mut privkey_path = state.cfg.client.cfg_dir.clone();
-    let mut pubkey_path = state.cfg.client.cfg_dir.clone();
+    let wg_template_path = Path::new(&state.cfg.client.cfg_dir).join("wg0.conf");
+    let ferm_template_path = Path::new(&state.cfg.client.cfg_dir).join("ferm.conf.patch");
+    let browser_template_path = Path::new(&state.cfg.client.cfg_dir).join("unsafe-browser.patch");
+    let privkey_path = Path::new(&state.cfg.client.cfg_dir).join("privkey");
+    let pubkey_path = Path::new(&state.cfg.client.cfg_dir).join("pubkey");
 
-    wg_template_path.push("wg0.conf");
-    ferm_template_path.push("ferm.conf.patch");
-    browser_template_path.push("unsafe-browser.patch");
-    privkey_path.push("privkey");
-    pubkey_path.push("pubkey");
-
-    fs::write(wg_template_path, &wg_template).expect("Couldn't write wg0.conf");
-    fs::write(ferm_template_path, &ferm_template).expect("Couldn't write ferm.conf.patch");
-    fs::write(browser_template_path, &browser_template)
+    fs::write(wg_template_path, wg_template).expect("Couldn't write wg0.conf");
+    fs::write(ferm_template_path, ferm_template).expect("Couldn't write ferm.conf.patch");
+    fs::write(browser_template_path, browser_template)
         .expect("Couldn't write unsafe-browser.patch");
-    fs::write(privkey_path, &privkey).expect("Couldn't write privkey");
-    fs::write(pubkey_path, &pubkey).expect("Couldn't write pubkey");
+    fs::write(privkey_path, privkey).expect("Couldn't write privkey");
+    fs::write(pubkey_path, pubkey).expect("Couldn't write pubkey");
 
     TemplateMessage::Template
 }
@@ -149,15 +143,11 @@ fn host_setup() -> HostSetupMessage {
 
 #[tauri::command]
 fn patch_system(password: &str, state: State<AppState>) -> PatchSystemMessage {
-    let mut wg_conf_path = state.cfg.client.cfg_dir.clone();
-    let mut ferm_patch_path = state.cfg.client.cfg_dir.clone();
-    let mut browser_patch_path = state.cfg.client.cfg_dir.clone();
+    let wg_conf_path = Path::new(&state.cfg.client.cfg_dir).join("wg0.conf");
+    let ferm_patch_path = Path::new(&state.cfg.client.cfg_dir).join("ferm.conf.patch");
+    let browser_patch_path = Path::new(&state.cfg.client.cfg_dir).join("unsafe-browser.patch");
 
-    wg_conf_path.push("wg0.conf");
-    ferm_patch_path.push("ferm.conf.patch");
-    browser_patch_path.push("unsafe-browser.patch");
-
-    if let Err(_) = cmd::test_sudo(password) {
+    if cmd::test_sudo(password).is_err() {
         return PatchSystemMessage::CommandError {
             message: "Administrator password failed.".to_string(),
         };

@@ -125,7 +125,7 @@ pub(crate) fn sudo_copy_file(
     source: &str,
     target: &str,
 ) -> Result<String, CmdError> {
-    sudo_mkdirp(&password, &target)?;
+    sudo_mkdirp(password, target)?;
 
     let mut child = Command::new("sudo")
         .arg("-S")
