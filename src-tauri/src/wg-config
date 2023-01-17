@@ -1,9 +1,14 @@
 [Interface]
 PrivateKey = { secret_key }
-Address = 10.11.0.4/24
+Address = { host }/32
+ListenPort = 55044
+
+Table = 42
+PostUp = ip rule add from { endpoint } table 42; ip route add default dev %i table 42;
+PostDown = ip rule del from { endpoint } table 42;
 
 [Peer]
-PublicKey = +0wn/liL7hqQoCfiSwtonUlZ8YKeGkBV4ZMqpt7s8DQ=
-AllowedIPs = 10.11.0.0/24
-Endpoint = 20.79.26.196:51820
+PublicKey = { public_key }
+AllowedIPs = { network }
+Endpoint = { endpoint }:51820
 PersistentKeepalive = 25

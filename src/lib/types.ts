@@ -13,3 +13,8 @@ export type AppConfig = {
   server: ServerConfig;
   client: ClientConfig;
 };
+
+export type WireguardConfig = {
+  publicKey: string;
+  privateKey: string;
+};

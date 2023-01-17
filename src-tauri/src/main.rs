@@ -3,23 +3,13 @@
     windows_subsystem = "windows"
 )]
 use serde::Serialize;
+use std::{fs, io::ErrorKind};
+use tauri::State;
 
 mod cfg;
 mod cmd;
+mod templates;
 mod wg;
-
-#[derive(Debug, Serialize)]
-#[serde(tag = "type")]
-enum WireguardMessage {
-    #[serde(rename = "success")]
-    WireguardConfig {
-        public_key: String,
-        private_key: String,
-        config_file: String,
-    },
-    #[serde(rename = "error")]
-    CommandError { message: String },
-}
 
 #[derive(Debug, Serialize)]
 #[serde(tag = "type")]
@@ -51,20 +41,100 @@ enum HostSetupMessage {
     CommandError { message: String },
 }
 
+#[derive(Debug, Serialize)]
+#[serde(tag = "type")]
+enum WireguardMessage {
+    #[serde(rename = "success")]
+    WireguardConfig {
+        public_key: String,
+        private_key: String,
+    },
+}
+
+#[derive(Debug, Serialize)]
+#[serde(tag = "type")]
+enum TemplateMessage {
+    #[serde(rename = "success")]
+    Template,
+    #[serde(rename = "error")]
+    CommandError { message: String },
+}
+
 #[tauri::command]
-fn wg_config() -> WireguardMessage {
+fn wg_keys(cfg: State<AppState>) -> WireguardMessage {
     let wireguard = wg::Wireguard::new();
 
-    match wireguard.wg_config() {
-        Ok(cfg) => WireguardMessage::WireguardConfig {
-            public_key: wireguard.public_encoded(),
-            private_key: wireguard.secret_encoded(),
-            config_file: cfg,
-        },
-        Err(e) => WireguardMessage::CommandError {
-            message: e.to_string(),
-        },
+    WireguardMessage::WireguardConfig {
+        public_key: wireguard.public_encoded(),
+        private_key: wireguard.secret_encoded(),
     }
+}
+
+#[tauri::command]
+fn templates(pubkey: &str, privkey: &str, state: State<AppState>) -> TemplateMessage {
+    let wg_template = match templates::wg_config(
+        privkey,
+        &state.cfg.vpn_server.public_key,
+        &state.cfg.vpn_server.host,
+        &state.cfg.vpn_server.endpoint,
+        &state.cfg.vpn_server.network,
+    ) {
+        Ok(tmpl) => tmpl,
+        Err(e) => {
+            return TemplateMessage::CommandError {
+                message: e.to_string(),
+            }
+        }
+    };
+
+    let ferm_template = match templates::ferm_patch(&state.cfg.vpn_server.endpoint) {
+        Ok(tmpl) => tmpl,
+        Err(e) => {
+            return TemplateMessage::CommandError {
+                message: e.to_string(),
+            }
+        }
+    };
+
+    let browser_template = match templates::browser_patch(&state.cfg.vpn_server.endpoint) {
+        Ok(tmpl) => tmpl,
+        Err(e) => {
+            return TemplateMessage::CommandError {
+                message: e.to_string(),
+            }
+        }
+    };
+
+    match fs::create_dir(&state.cfg.client.cfg_dir) {
+        _ => {}
+        Err(e) => {
+            if e.kind() != ErrorKind::AlreadyExists {
+                let msg = e.to_string();
+                return TemplateMessage::CommandError { message: msg };
+            }
+        }
+    };
+
+    let mut wg_template_path = state.cfg.client.cfg_dir.clone();
+    let mut ferm_template_path = state.cfg.client.cfg_dir.clone();
+    let mut browser_template_path = state.cfg.client.cfg_dir.clone();
+    let mut privkey_path = state.cfg.client.cfg_dir.clone();
+    let mut pubkey_path = state.cfg.client.cfg_dir.clone();
+
+    wg_template_path.push("wg0.conf");
+    ferm_template_path.push("ferm.conf.patch");
+    browser_template_path.push("unsafe-browser.patch");
+    privkey_path.push("privkey");
+    pubkey_path.push("pubkey");
+
+    fs::write(wg_template_path, &wg_template).expect("Couldn't write wg0.conf");
+    fs::write(ferm_template_path, &ferm_template).expect("Couldn't write ferm.conf.patch");
+    fs::write(browser_template_path, &browser_template)
+        .expect("Couldn't write unsafe-browser.patch");
+    fs::write(privkey_path, &privkey).expect("Couldn't write privkey");
+    fs::write(pubkey_path, &pubkey).expect("Couldn't write pubkey");
+
+    TemplateMessage::Template
 }
 
 #[tauri::command]
@@ -78,9 +148,9 @@ fn uname(password: &str) -> UnameMessage {
 }
 
 #[tauri::command]
-fn app_config() -> AppConfigMessage {
+fn app_config(state: State<AppState>) -> AppConfigMessage {
     AppConfigMessage::AppConfig {
-        cfg: (*cfg::APP_CONFIG).clone(),
+        cfg: state.cfg.clone(),
     }
 }
 
@@ -92,10 +162,24 @@ fn host_setup() -> HostSetupMessage {
     }
 }
 
+#[derive(Debug)]
+struct AppState {
+    cfg: cfg::AppConfig,
+}
+
+impl AppState {
+    fn new() -> Self {
+        Self {
+            cfg: (*cfg::APP_CONFIG).clone(),
+        }
+    }
+}
+
 fn main() {
     tauri::Builder::default()
+        .manage(AppState::new())
         .invoke_handler(tauri::generate_handler![
-            wg_config, uname, app_config, host_setup
+            wg_keys, uname, app_config, host_setup, templates
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

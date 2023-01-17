@@ -1,11 +1,14 @@
 {
   "project": "My Project",
   "vpn_server": {
-    "host": "10.0.11.1",
+    "host": "10.0.1.1",
+    "network": "10.0.1.0/24",
+    "endpoint": "9.9.9.9",
     "public_key": "my-public-key"
   },
   "client": {
     "ferm_config": "/etc/ferm.d/ferm.conf",
-    "wg_config": "/etc/wg0/wg.conf"
+    "wg_config": "/etc/wg0/wg.conf",
+    "cfg_dir": "/live/persistence/TailsData_unlocked/.liquid"
   }
 }

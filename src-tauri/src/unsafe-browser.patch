@@ -1,0 +1,11 @@
+--- /usr/local/sbin/unsafe-browser	2022-12-19 09:43:26.000000000 +0000
++++ unsafe-browser	2023-01-12 12:24:06.980003349 +0000
+@@ -152,6 +152,8 @@
+ echo '127.0.0.42 firefox.settings.services.mozilla.com' \
+      >> "$\{CHROOT}"/etc/hosts
+ 
++echo '{ host }      liquidvpn.home.arpa hoover.liquidvpn.home.arpa dokuwiki.liquidvpn.home.arpa rocketchat.liquidvpn.home.arpa nextcloud.liquidvpn.home.arpa codimd.liquidvpn.home.arpa' >> "$\{CHROOT}"/etc/hosts
++
+ echo "* Starting Unsafe Browser"
+ # Do not localize the 5th argument: it becomes WM_CLASS and then GNOME
+ # displays the localized app name found in the matching .desktop file;

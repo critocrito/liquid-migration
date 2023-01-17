@@ -12,7 +12,7 @@ const HeaderBar = ({title, onNavigateBack}: HeaderBarProps) => {
       <div className="mx-auto max-w-7xl py-4 px-4 sm:px-6 lg:px-8 flex items-center">
         {onNavigateBack && (
           <button type="button" onClick={onNavigateBack}>
-            <ChevronLeftIcon className="h-8 h-8 mr-4" />
+            <ChevronLeftIcon className="h-8 w-8 mr-4" />
           </button>
         )}
 
