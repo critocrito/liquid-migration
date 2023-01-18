@@ -7,7 +7,7 @@
     "build": "tsc && vite build",
     "dev": "vite",
     "fix": "run-p --aggregate-output --continue-on-error lint:*:fix",
-    "postinstall": "run-s typestates",
+    "postinstall": "run-s xstates",
     "lint": "run-p --aggregate-output --continue-on-error 'lint:**:!(fix)'",
     "lint:eslint": "eslint --ignore-path .gitignore --ignore-path .eslintignore .",
     "lint:eslint:fix": "npm run lint:eslint -- --fix",
