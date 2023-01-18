@@ -18,4 +18,4 @@ The `app-config.json` is read at compile time and parameterizes the client to a 
 - `client.ferm_config` (optional): The path to the firewall config file on the Tails client. Defaults to `/etc/ferm/ferm.conf`.
 - `client.wg_config` (optional): The path to the Wireguard config file on the Tails client. Defaults to `/etc/wireguard/wg0.conf`.
 - `client.unsafe_browser` (optional): The path to the unsafe browser start script on the Tails client. Defaults to `/usr/local/sbin/unsafe-browser`.
-- `client.cfg_dir` (optional): The path to the config directory on the client, where to store the generated templates. Defaults to `/live/persistence/TailsData_unlocked/.liquid`.
+- `client.cfg_dir` (optional): The path to the config directory on the client, where to store the generated templates. Defaults to `/home/amnesia/Persistent/.liquid`.

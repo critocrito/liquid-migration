@@ -16,7 +16,7 @@ fn default_unsafe_browser() -> String {
 }
 
 fn default_cfg_dir() -> String {
-    "/live/persistence/TailsData_unlocked/.liquid".to_string()
+    "/home/amnesia/Persistent/.liquid".to_string()
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
