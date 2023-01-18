@@ -1,11 +1,6 @@
 [Interface]
 PrivateKey = { secret_key }
 Address = { ipaddr }/32
-ListenPort = 55044
-
-Table = 42
-PostUp = ip rule add from { endpoint } table 42; ip route add default dev %i table 42;
-PostDown = ip rule del from { endpoint } table 42;
 
 [Peer]
 PublicKey = { public_key }
