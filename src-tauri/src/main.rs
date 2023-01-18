@@ -75,6 +75,7 @@ fn templates(pubkey: &str, privkey: &str, ipaddr: &str, state: State<AppState>) 
         &state.cfg.server.public_key,
         &state.cfg.server.host,
         &state.cfg.server.endpoint,
+        &state.cfg.server.port,
         &state.cfg.server.network,
         ipaddr,
     ) {

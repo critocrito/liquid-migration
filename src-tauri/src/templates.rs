@@ -20,6 +20,7 @@ struct WgTemplateContext {
     network: String,
     host: String,
     endpoint: String,
+    port: String,
     ipaddr: String,
 }
 
@@ -38,6 +39,7 @@ pub fn wg_config(
     public_key: &str,
     host: &Ipv4Addr,
     endpoint: &Ipv4Addr,
+    port: &str,
     network: &str,
     ipaddr: &str,
 ) -> Result<String, TemplateError> {
@@ -49,6 +51,7 @@ pub fn wg_config(
         public_key: public_key.to_string(),
         host: host.to_string(),
         endpoint: endpoint.to_string(),
+        port: port.to_string(),
         network: network.to_string(),
         ipaddr: ipaddr.to_string(),
     };

@@ -4,6 +4,7 @@
     "host": "10.0.1.1",
     "network": "10.0.1.0/24",
     "endpoint": "9.9.9.9",
+    "port": "51820",
     "public_key": "my-public-key"
   },
   "client": {

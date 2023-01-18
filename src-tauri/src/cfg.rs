@@ -23,6 +23,7 @@ fn default_cfg_dir() -> String {
 pub(crate) struct Server {
     pub(crate) host: std::net::Ipv4Addr,
     pub(crate) endpoint: std::net::Ipv4Addr,
+    pub(crate) port: String,
     pub(crate) public_key: String,
     pub(crate) network: String,
 }

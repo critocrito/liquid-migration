@@ -5,5 +5,5 @@ Address = { ipaddr }/32
 [Peer]
 PublicKey = { public_key }
 AllowedIPs = { network }
-Endpoint = { endpoint }:51820
+Endpoint = { endpoint }:{ port }
 PersistentKeepalive = 25
