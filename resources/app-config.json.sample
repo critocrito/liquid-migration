@@ -8,7 +8,7 @@
   },
   "client": {
     "ferm_config": "/etc/ferm/ferm.conf",
-    "wg_config": "/etc/wg0/wg.conf",
+    "wg_config": "/etc/wireguard/wg0.conf",
     "unsafe_browser": "/usr/local/sbin/unsafe-browser",
     "cfg_dir": "/home/amnesia/Persistent/.liquid"
   }
