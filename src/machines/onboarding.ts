@@ -124,7 +124,7 @@ export default createMachine(
       generateWireguard: wireguardAction,
 
       persistConfig: async (ctx) => {
-        templatesAction(
+        await templatesAction(
           ctx.wireguardConfig?.publicKey || "",
           ctx.wireguardConfig?.privateKey || "",
           ctx.ipAddress,
