@@ -88,10 +88,12 @@ export const wireguardAction = async (): Promise<WireguardConfig> => {
 export const templatesAction = async (
   publicKey: string,
   privateKey: string,
+  ipAddress: string,
 ): Promise<void> => {
   const resp = await invoke<TemplatesActionMessage>("templates", {
     privkey: privateKey,
     pubkey: publicKey,
+    ipaddr: ipAddress,
   });
 
   if (resp.type === "error") {

@@ -20,6 +20,7 @@ struct WgTemplateContext {
     network: String,
     host: String,
     endpoint: String,
+    ipaddr: String,
 }
 
 #[derive(Serialize)]
@@ -38,6 +39,7 @@ pub fn wg_config(
     host: &Ipv4Addr,
     endpoint: &Ipv4Addr,
     network: &str,
+    ipaddr: &str,
 ) -> Result<String, TemplateError> {
     let mut tt = TinyTemplate::new();
     tt.add_template("hello", WG_TEMPLATE)?;
@@ -48,6 +50,7 @@ pub fn wg_config(
         host: host.to_string(),
         endpoint: endpoint.to_string(),
         network: network.to_string(),
+        ipaddr: ipaddr.to_string(),
     };
 
     let rendered = tt.render("hello", &context)?;

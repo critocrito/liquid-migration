@@ -1,6 +1,6 @@
 [Interface]
 PrivateKey = { secret_key }
-Address = { host }/32
+Address = { ipaddr }/32
 ListenPort = 55044
 
 Table = 42

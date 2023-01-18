@@ -5,9 +5,14 @@ import type {WireguardConfig} from "$lib/types";
 
 type Context = {
   wireguardConfig?: WireguardConfig;
+  ipAddress: string;
   error?: string;
 };
-type Event = {type: "NEXT"} | {type: "FAIL"; error: string} | {type: "RESET"};
+type Event =
+  | {type: "NEXT"}
+  | {type: "STORE_IP"; ipAddress: string}
+  | {type: "FAIL"; error: string}
+  | {type: "RESET"};
 
 export default createMachine(
   {
@@ -32,7 +37,7 @@ export default createMachine(
 
     initial: "init",
 
-    context: {},
+    context: {ipAddress: ""},
 
     states: {
       init: {
@@ -59,7 +64,16 @@ export default createMachine(
 
       wireguard: {
         on: {
-          NEXT: {target: "persisting"},
+          NEXT: {target: "ipAddress"},
+        },
+      },
+
+      ipAddress: {
+        on: {
+          STORE_IP: {
+            target: "persisting",
+            actions: "assignIpAddress",
+          },
         },
       },
 
@@ -102,6 +116,8 @@ export default createMachine(
           return data;
         },
       }),
+
+      assignIpAddress: assign({ipAddress: (_ctx, event) => event.ipAddress}),
     },
 
     services: {
@@ -111,6 +127,7 @@ export default createMachine(
         templatesAction(
           ctx.wireguardConfig?.publicKey || "",
           ctx.wireguardConfig?.privateKey || "",
+          ctx.ipAddress,
         );
       },
     },

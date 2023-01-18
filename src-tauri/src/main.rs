@@ -69,13 +69,14 @@ fn wg_keys() -> WireguardMessage {
 }
 
 #[tauri::command]
-fn templates(pubkey: &str, privkey: &str, state: State<AppState>) -> TemplateMessage {
+fn templates(pubkey: &str, privkey: &str, ipaddr: &str, state: State<AppState>) -> TemplateMessage {
     let wg_template = match templates::wg_config(
         privkey,
         &state.cfg.server.public_key,
         &state.cfg.server.host,
         &state.cfg.server.endpoint,
         &state.cfg.server.network,
+        ipaddr,
     ) {
         Ok(tmpl) => tmpl,
         Err(e) => {
@@ -115,6 +116,7 @@ fn templates(pubkey: &str, privkey: &str, state: State<AppState>) -> TemplateMes
     let browser_template_path = Path::new(&state.cfg.client.cfg_dir).join("unsafe-browser.patch");
     let privkey_path = Path::new(&state.cfg.client.cfg_dir).join("privkey");
     let pubkey_path = Path::new(&state.cfg.client.cfg_dir).join("pubkey");
+    let ipaddr_path = Path::new(&state.cfg.client.cfg_dir).join("ipaddr");
 
     fs::write(wg_template_path, wg_template).expect("Couldn't write wg0.conf");
     fs::write(ferm_template_path, ferm_template).expect("Couldn't write ferm.conf.patch");
@@ -122,6 +124,7 @@ fn templates(pubkey: &str, privkey: &str, state: State<AppState>) -> TemplateMes
         .expect("Couldn't write unsafe-browser.patch");
     fs::write(privkey_path, privkey).expect("Couldn't write privkey");
     fs::write(pubkey_path, pubkey).expect("Couldn't write pubkey");
+    fs::write(ipaddr_path, ipaddr).expect("Couldn't write ipaddr");
 
     TemplateMessage::Template
 }
