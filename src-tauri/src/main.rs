@@ -150,12 +150,14 @@ fn patch_system(password: &str, state: State<AppState>) -> PatchSystemMessage {
     let ferm_patch_path = Path::new(&state.cfg.client.cfg_dir).join("ferm.conf.patch");
     let browser_patch_path = Path::new(&state.cfg.client.cfg_dir).join("unsafe-browser.patch");
 
+    println!("test_sudo");
     if cmd::test_sudo(password).is_err() {
         return PatchSystemMessage::CommandError {
             message: "Administrator password failed.".to_string(),
         };
     }
 
+    println!("sudo_patch_file");
     if let Err(e) = cmd::sudo_patch_file(
         password,
         &ferm_patch_path.to_string_lossy(),
@@ -166,6 +168,7 @@ fn patch_system(password: &str, state: State<AppState>) -> PatchSystemMessage {
         };
     }
 
+    println!("sudo_patch_file");
     if let Err(e) = cmd::sudo_patch_file(
         password,
         &browser_patch_path.to_string_lossy(),
@@ -176,11 +179,33 @@ fn patch_system(password: &str, state: State<AppState>) -> PatchSystemMessage {
         };
     }
 
+    println!("sudo_copy_file");
     if let Err(e) = cmd::sudo_copy_file(
         password,
         &wg_conf_path.to_string_lossy(),
         &state.cfg.client.wg_config,
     ) {
+        return PatchSystemMessage::CommandError {
+            message: e.to_string(),
+        };
+    }
+
+    println!("sudo_service_restart");
+    if let Err(e) = cmd::sudo_service_restart(password, "ferm") {
+        return PatchSystemMessage::CommandError {
+            message: e.to_string(),
+        };
+    }
+
+    println!("sudo_modprobe");
+    if let Err(e) = cmd::sudo_modprobe(password, "wireguard") {
+        return PatchSystemMessage::CommandError {
+            message: e.to_string(),
+        };
+    }
+
+    println!("sudo_wg_up");
+    if let Err(e) = cmd::sudo_wg_up(password) {
         return PatchSystemMessage::CommandError {
             message: e.to_string(),
         };

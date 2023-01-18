@@ -153,3 +153,113 @@ pub(crate) fn sudo_copy_file(
         ))
     }
 }
+
+#[cfg(target_os = "linux")]
+pub(crate) fn sudo_service_restart(password: &str, service: &str) -> Result<String, CmdError> {
+    let mut child = Command::new("sudo")
+        .arg("-S")
+        .arg("-k")
+        .arg("service")
+        .arg(service)
+        .arg("restart")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()?;
+
+    let child_stdin = child.stdin.as_mut();
+    if let Some(stdin) = child_stdin {
+        stdin.write_all(password.as_bytes())?;
+        stdin.write_all(b"\n")?;
+    }
+
+    let output = child.wait_with_output()?;
+
+    if output.status.success() {
+        Ok(String::from_utf8_lossy(&output.stdout).to_string())
+    } else {
+        Err(CmdError::Sudo(
+            String::from_utf8_lossy(&output.stderr).to_string(),
+        ))
+    }
+}
+
+#[cfg(target_os = "macos")]
+pub(crate) fn sudo_service_restart(_password: &str, service: &str) -> Result<(), CmdError> {
+    println!("Restarting service '{}'", service);
+    // Err(CmdError::Sudo("Boom!".to_string()))
+    std::thread::sleep(std::time::Duration::from_millis(1000));
+    Ok(())
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn sudo_modprobe(password: &str, module: &str) -> Result<String, CmdError> {
+    let mut child = Command::new("sudo")
+        .arg("-S")
+        .arg("-k")
+        .arg("modprobe")
+        .arg(module)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()?;
+
+    let child_stdin = child.stdin.as_mut();
+    if let Some(stdin) = child_stdin {
+        stdin.write_all(password.as_bytes())?;
+        stdin.write_all(b"\n")?;
+    }
+
+    let output = child.wait_with_output()?;
+
+    if output.status.success() {
+        Ok(String::from_utf8_lossy(&output.stdout).to_string())
+    } else {
+        Err(CmdError::Sudo(
+            String::from_utf8_lossy(&output.stderr).to_string(),
+        ))
+    }
+}
+
+#[cfg(target_os = "macos")]
+pub(crate) fn sudo_modprobe(_password: &str, module: &str) -> Result<(), CmdError> {
+    println!("Loading '{}' kernel module", module);
+    // Err(CmdError::Sudo("Boom!".to_string()))
+    std::thread::sleep(std::time::Duration::from_millis(1000));
+    Ok(())
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn sudo_wg_up(password: &str) -> Result<String, CmdError> {
+    let mut child = Command::new("sudo")
+        .arg("-S")
+        .arg("-k")
+        .arg("wg-quick")
+        .arg("up")
+        .arg("wg0")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()?;
+
+    let child_stdin = child.stdin.as_mut();
+    if let Some(stdin) = child_stdin {
+        stdin.write_all(password.as_bytes())?;
+        stdin.write_all(b"\n")?;
+    }
+
+    let output = child.wait_with_output()?;
+
+    if output.status.success() {
+        Ok(String::from_utf8_lossy(&output.stdout).to_string())
+    } else {
+        Err(CmdError::Sudo(
+            String::from_utf8_lossy(&output.stderr).to_string(),
+        ))
+    }
+}
+
+#[cfg(target_os = "macos")]
+pub(crate) fn sudo_wg_up(_password: &str) -> Result<(), CmdError> {
+    println!("Bringing up the VPN.");
+    // Err(CmdError::Sudo("Boom!".to_string()))
+    std::thread::sleep(std::time::Duration::from_millis(1000));
+    Ok(())
+}
