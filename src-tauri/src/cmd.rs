@@ -91,14 +91,17 @@ pub(crate) fn sudo_patch_file(
 }
 
 pub(crate) fn sudo_mkdirp(password: &str, target: &str) -> Result<String, CmdError> {
-    let target_path = Path::new(target);
+    let mut target_path = Path::new(target).to_path_buf();
+    target_path.pop();
+
+    println!("mkdir -p {}", target_path.to_str().unwrap());
 
     let mut child = Command::new("sudo")
         .arg("-S")
         .arg("-k")
         .arg("mkdir")
         .arg("-p")
-        .arg(target_path.file_stem().unwrap())
+        .arg(target_path.to_str().unwrap())
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()?;
