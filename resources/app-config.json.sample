@@ -10,6 +10,6 @@
     "ferm_config": "/etc/ferm.d/ferm.conf",
     "wg_config": "/etc/wg0/wg.conf",
     "unsafe_browser": "/usr/local/sbin/unsafe-browser",
-    "cfg_dir": "/live/persistence/TailsData_unlocked/.liquid"
+    "cfg_dir": "/home/amnesia/Persistent/.liquid"
   }
 }
