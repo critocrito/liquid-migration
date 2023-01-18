@@ -3,7 +3,7 @@ import {assign, createMachine, DoneInvokeEvent} from "xstate";
 import {patchingAction} from "$lib/actions";
 
 type Context = {
-  password?: string;
+  password: string;
   error?: string;
 };
 type Event =
@@ -32,10 +32,11 @@ export default createMachine(
 
     initial: "init",
 
-    context: {},
+    context: {password: ""},
 
     states: {
       init: {
+        entry: "resetPassword",
         on: {
           NEXT: {target: "password"},
         },
@@ -83,11 +84,15 @@ export default createMachine(
         },
       }),
 
+      resetPassword: assign({
+        password: () => "",
+      }),
+
       assignPassword: assign({password: (_ctx, event) => event.password}),
     },
 
     services: {
-      patchingSystem: async (ctx) => patchingAction(ctx.password || ""),
+      patchingSystem: async (ctx) => patchingAction(ctx.password),
     },
   },
 );
