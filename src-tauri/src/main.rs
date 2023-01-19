@@ -42,6 +42,13 @@ enum WireguardMessage {
 
 #[derive(Debug, Serialize)]
 #[serde(tag = "type")]
+enum CachedIpMessage {
+    #[serde(rename = "success")]
+    CachedIp { ip_address: Option<String> },
+}
+
+#[derive(Debug, Serialize)]
+#[serde(tag = "type")]
 enum TemplateMessage {
     #[serde(rename = "success")]
     Template,
@@ -69,6 +76,16 @@ fn wg_keys(state: State<AppState>) -> WireguardMessage {
         public_key: wireguard.public_encoded(),
         private_key: wireguard.secret_encoded(),
     }
+}
+
+#[tauri::command]
+fn cached_ip(state: State<AppState>) -> CachedIpMessage {
+    let ip_address = match cfg::cached_ipaddr(&state.cfg.client.cfg_dir) {
+        Err(_) => None,
+        Ok(ip_addr) => Some(ip_addr.to_string()),
+    };
+
+    CachedIpMessage::CachedIp { ip_address }
 }
 
 #[tauri::command]
@@ -236,6 +253,7 @@ fn main() {
         .manage(AppState::new())
         .invoke_handler(tauri::generate_handler![
             wg_keys,
+            cached_ip,
             app_config,
             host_setup,
             templates,

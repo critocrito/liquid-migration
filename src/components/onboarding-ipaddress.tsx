@@ -7,6 +7,7 @@ interface OnboardingIpaddressProps {
   onCancel: () => void;
   onChange: (p: string) => void;
   ipAddress: string;
+  disabled: boolean;
 }
 
 const OnboardingIpaddress = ({
@@ -14,6 +15,7 @@ const OnboardingIpaddress = ({
   onCancel,
   onChange,
   ipAddress,
+  disabled,
 }: OnboardingIpaddressProps) => {
   return (
     <Content
@@ -39,6 +41,7 @@ const OnboardingIpaddress = ({
               placeholder="Fill here your client IP address"
               value={ipAddress}
               type="text"
+              disabled={disabled}
             />
           </div>
         </div>

@@ -1,7 +1,27 @@
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
+use std::{
+    fs,
+    net::{AddrParseError, Ipv4Addr},
+    path::Path,
+};
+use thiserror::Error;
 
 const CFG_JSON: &str = include_str!("../../resources/app-config.json");
+
+#[derive(Debug, Error)]
+pub(crate) enum AppCfgError {
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+    #[error("failed to parse config value: {0}")]
+    Parse(String),
+}
+
+impl From<AddrParseError> for AppCfgError {
+    fn from(e: AddrParseError) -> Self {
+        AppCfgError::Parse(e.to_string())
+    }
+}
 
 fn default_port() -> String {
     "51820".to_string()
@@ -25,8 +45,8 @@ fn default_cfg_dir() -> String {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub(crate) struct Server {
-    pub(crate) host: std::net::Ipv4Addr,
-    pub(crate) endpoint: std::net::Ipv4Addr,
+    pub(crate) host: Ipv4Addr,
+    pub(crate) endpoint: Ipv4Addr,
     #[serde(default = "default_port")]
     pub(crate) port: String,
     pub(crate) public_key: String,
@@ -66,4 +86,11 @@ pub(crate) struct AppConfig {
 
 lazy_static! {
     pub(crate) static ref APP_CONFIG: AppConfig = serde_json::from_str(CFG_JSON).unwrap();
+}
+
+pub(crate) fn cached_ipaddr(cfg_dir: &str) -> Result<std::net::Ipv4Addr, AppCfgError> {
+    let ipaddr_path = Path::new(cfg_dir).join("ipaddr");
+    let ipaddr_file = fs::read(ipaddr_path)?;
+
+    Ok(String::from_utf8_lossy(&ipaddr_file).parse::<Ipv4Addr>()?)
 }

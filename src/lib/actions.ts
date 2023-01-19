@@ -38,9 +38,15 @@ type WireguardAction = {
   private_key: string;
 };
 
+type CachedIpAction = {
+  type: "success";
+  ip_address?: string;
+};
+
 export type AppActionMessage = AppAction | ActionError;
 export type HostActionMessage = HostAction | ActionDelay | ActionError;
 export type WireguardActionMessage = WireguardAction | ActionError;
+export type CachedIpActionMessage = CachedIpAction | ActionError;
 export type TemplatesActionMessage = EmptyAction | ActionError;
 export type PatchingActionMessage = EmptyAction | ActionError;
 
@@ -83,6 +89,16 @@ export const wireguardAction = async (): Promise<WireguardConfig> => {
     publicKey: resp.public_key,
     privateKey: resp.private_key,
   };
+};
+
+export const cachedIpAction = async (): Promise<string> => {
+  const resp = await invoke<CachedIpActionMessage>("cached_ip", {});
+
+  if (resp.type === "error") {
+    throw new Error(resp.message);
+  }
+
+  return resp.ip_address ?? "";
 };
 
 export const templatesAction = async (

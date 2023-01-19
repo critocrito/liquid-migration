@@ -1,5 +1,5 @@
 import {useMachine} from "@xstate/react";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 
 import Bootstrap from "$components/bootstrap";
 import Error from "$components/error";
@@ -19,9 +19,17 @@ const Onboarding = ({onCancel}: OnboardingProps) => {
   const [state, send, service] = useMachine(machine);
   const [ipAddress, setIpAddress] = useState("");
 
+  useEffect(() => {
+    setIpAddress(state.context.ipAddress);
+  }, [state.context.ipAddress]);
+
   useServiceLogger(service, machine.id);
 
-  if (state.matches("persisting") || state.matches("generatingWireguard")) {
+  if (
+    state.matches("persisting") ||
+    state.matches("generatingWireguard") ||
+    state.matches("cachedIp")
+  ) {
     return <Bootstrap />;
   }
 
@@ -46,6 +54,7 @@ const Onboarding = ({onCancel}: OnboardingProps) => {
         onCancel={onCancel}
         onChange={setIpAddress}
         ipAddress={ipAddress}
+        disabled={state.context.ipAddress !== ""}
       />
     );
   }

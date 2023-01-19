@@ -1,6 +1,6 @@
 import {assign, createMachine, DoneInvokeEvent} from "xstate";
 
-import {templatesAction, wireguardAction} from "$lib/actions";
+import {cachedIpAction, templatesAction, wireguardAction} from "$lib/actions";
 import type {WireguardConfig} from "$lib/types";
 
 type Context = {
@@ -27,8 +27,13 @@ export default createMachine(
         persistConfig: {
           data: void;
         };
+
         wireguardConfig: {
           data: WireguardConfig;
+        };
+
+        cachedIp: {
+          data: string;
         };
       },
     },
@@ -52,8 +57,22 @@ export default createMachine(
         invoke: {
           src: "generateWireguard",
           onDone: {
-            target: "wireguard",
+            target: "cachedIp",
             actions: "assignWireguardConfig",
+          },
+          onError: {
+            target: "error",
+            actions: "fail",
+          },
+        },
+      },
+
+      cachedIp: {
+        invoke: {
+          src: "cachedIp",
+          onDone: {
+            target: "wireguard",
+            actions: "assignIpAddress2",
           },
           onError: {
             target: "error",
@@ -117,11 +136,19 @@ export default createMachine(
         },
       }),
 
-      assignIpAddress: assign({ipAddress: (_ctx, event) => event.ipAddress}),
+      assignIpAddress: assign({
+        ipAddress: (_ctx, event) => event.ipAddress,
+      }),
+
+      assignIpAddress2: assign({
+        ipAddress: (_ctx, event) => event.data,
+      }),
     },
 
     services: {
       generateWireguard: wireguardAction,
+
+      cachedIp: cachedIpAction,
 
       persistConfig: async (ctx) => {
         await templatesAction(

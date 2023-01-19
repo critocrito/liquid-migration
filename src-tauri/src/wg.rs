@@ -64,7 +64,7 @@ impl Wireguard {
         let privkey_file = fs::read(privkey_path)?;
         let privkey = String::from_utf8_lossy(&privkey_file);
 
-        Ok(Wireguard::from_encoded(&privkey, &pubkey)?)
+        Wireguard::from_encoded(&privkey, &pubkey)
     }
 }
 
