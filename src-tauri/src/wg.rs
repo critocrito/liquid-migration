@@ -1,6 +1,6 @@
 use rand_core::OsRng;
 use serde::Serialize;
-use std::fmt;
+use std::{fmt, fs, path::Path};
 use thiserror::Error;
 use x25519_dalek::{PublicKey, StaticSecret};
 
@@ -10,6 +10,8 @@ pub enum WgError {
     Decode(#[from] base64::DecodeError),
     #[error("parsing key from string")]
     Parse,
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
 }
 
 #[derive(Serialize)]
@@ -52,6 +54,18 @@ impl Wireguard {
             public: PublicKey::from(pubkey.to_owned()),
         })
     }
+
+    pub fn from_path(dir: &str) -> Result<Self, WgError> {
+        let pubkey_path = Path::new(&dir).join("pubkey");
+        let pubkey_file = fs::read(pubkey_path)?;
+        let pubkey = String::from_utf8_lossy(&pubkey_file);
+
+        let privkey_path = Path::new(&dir).join("privkey");
+        let privkey_file = fs::read(privkey_path)?;
+        let privkey = String::from_utf8_lossy(&privkey_file);
+
+        Ok(Wireguard::from_encoded(&privkey, &pubkey)?)
+    }
 }
 
 impl fmt::Debug for Wireguard {
@@ -66,6 +80,17 @@ impl fmt::Debug for Wireguard {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn generate_new_keys() {
+        let wg = Wireguard::new();
+
+        let pubkey = wg.public_encoded();
+        let privkey = wg.secret_encoded();
+
+        assert_eq!(pubkey.len(), 44);
+        assert_eq!(privkey.len(), 44);
+    }
 
     #[test]
     fn restore_keys_from_string() {

@@ -59,8 +59,11 @@ enum PatchSystemMessage {
 }
 
 #[tauri::command]
-fn wg_keys() -> WireguardMessage {
-    let wireguard = wg::Wireguard::new();
+fn wg_keys(state: State<AppState>) -> WireguardMessage {
+    let wireguard = match wg::Wireguard::from_path(&state.cfg.client.cfg_dir) {
+        Ok(wireguard) => wireguard,
+        Err(_) => wg::Wireguard::new(),
+    };
 
     WireguardMessage::WireguardConfig {
         public_key: wireguard.public_encoded(),
