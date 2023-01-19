@@ -3,6 +3,10 @@ use serde::{Deserialize, Serialize};
 
 const CFG_JSON: &str = include_str!("../../resources/app-config.json");
 
+fn default_port() -> String {
+    "51820".to_string()
+}
+
 fn default_ferm() -> String {
     "/etc/ferm/ferm.conf".to_string()
 }
@@ -23,6 +27,7 @@ fn default_cfg_dir() -> String {
 pub(crate) struct Server {
     pub(crate) host: std::net::Ipv4Addr,
     pub(crate) endpoint: std::net::Ipv4Addr,
+    #[serde(default = "default_port")]
     pub(crate) port: String,
     pub(crate) public_key: String,
     pub(crate) network: String,
