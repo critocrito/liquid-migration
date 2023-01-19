@@ -1,6 +1,6 @@
 import {actions, assign, createMachine, DoneInvokeEvent, send} from "xstate";
 
-import {appAction, hostAction} from "$lib/actions";
+import {appAction, deleteStateAction, hostAction} from "$lib/actions";
 import type {AppConfig, ClientConfig, ServerConfig} from "$lib/types";
 
 const {choose} = actions;
@@ -18,6 +18,7 @@ type Event =
   | {type: "OK"}
   | {type: "EDIT"}
   | {type: "SAVE"; config: AppConfig}
+  | {type: "DELETE_STATE"}
   | {type: "CANCEL"}
   | {type: "FAIL"; error: string}
   | {type: "RESET"};
@@ -31,6 +32,9 @@ export default createMachine(
       services: {} as {
         loadConfig: {
           data: AppConfig;
+        };
+        deleteState: {
+          data: void;
         };
         verifyHost: {
           data: "ok" | "poll";
@@ -94,6 +98,27 @@ export default createMachine(
         on: {
           SAVE: {target: "loaded"},
           CANCEL: {target: "loaded"},
+          DELETE_STATE: {target: "confirmDeleteState"},
+        },
+      },
+
+      confirmDeleteState: {
+        on: {
+          OK: {target: "deleteState"},
+          CANCEL: {target: "settings"},
+        },
+      },
+
+      deleteState: {
+        invoke: {
+          src: "deleteState",
+          onDone: {
+            target: "loading",
+          },
+          onError: {
+            target: "error",
+            actions: "fail",
+          },
         },
       },
 
@@ -131,6 +156,8 @@ export default createMachine(
       loadConfig: appAction,
 
       verifyHost: hostAction,
+
+      deleteState: deleteStateAction,
     },
   },
 );

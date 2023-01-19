@@ -4,6 +4,7 @@ import {useMachine} from "@xstate/react";
 import React from "react";
 
 import Bootstrap from "$components/bootstrap";
+import ConfirmAction from "$components/confirm-action";
 import Error from "$components/error";
 import Loaded from "$components/loaded";
 import Settings from "$components/settings";
@@ -20,7 +21,8 @@ const App = () => {
   if (
     state.matches("loading") ||
     state.matches("verifyHost") ||
-    state.matches("pollHost")
+    state.matches("pollHost") ||
+    state.matches("deleteState")
   )
     return <Bootstrap />;
 
@@ -40,7 +42,21 @@ const App = () => {
   if (state.matches("settings"))
     return (
       <Shell title="Settings" onClickBack={() => send("CANCEL")}>
-        <Settings />
+        <Settings onDelete={() => send("DELETE_STATE")} />
+      </Shell>
+    );
+
+  if (state.matches("confirmDeleteState"))
+    return (
+      <Shell title="Settings" onClickBack={() => {}}>
+        <ConfirmAction
+          title="Delete Onboarding Information"
+          label="Delete"
+          description="Are you sure you want to remove the previous onboarding information? All data will be removed from your local installation. This action cannot be undone."
+          onConfirm={() => send("OK")}
+          onCancel={() => send("CANCEL")}
+        />
+        <Settings onDelete={() => {}} />
       </Shell>
     );
 

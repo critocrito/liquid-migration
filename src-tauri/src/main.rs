@@ -65,6 +65,15 @@ enum PatchSystemMessage {
     CommandError { message: String },
 }
 
+#[derive(Debug, Serialize)]
+#[serde(tag = "type")]
+enum DeleteStateMessage {
+    #[serde(rename = "success")]
+    Deleted,
+    #[serde(rename = "error")]
+    CommandError { message: String },
+}
+
 #[tauri::command]
 fn wg_keys(state: State<AppState>) -> WireguardMessage {
     let wireguard = match wg::Wireguard::from_path(&state.cfg.client.cfg_dir) {
@@ -235,6 +244,20 @@ fn patch_system(password: &str, state: State<AppState>) -> PatchSystemMessage {
     PatchSystemMessage::Patched
 }
 
+#[tauri::command]
+fn delete_state(state: State<AppState>) -> DeleteStateMessage {
+    if !Path::new(&state.cfg.client.cfg_dir).exists() {
+        return DeleteStateMessage::Deleted;
+    };
+
+    match fs::remove_dir_all(&state.cfg.client.cfg_dir) {
+        Ok(_) => DeleteStateMessage::Deleted,
+        Err(e) => DeleteStateMessage::CommandError {
+            message: e.to_string(),
+        },
+    }
+}
+
 #[derive(Debug)]
 struct AppState {
     cfg: cfg::AppConfig,
@@ -257,7 +280,8 @@ fn main() {
             app_config,
             host_setup,
             templates,
-            patch_system
+            patch_system,
+            delete_state
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

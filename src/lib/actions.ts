@@ -49,6 +49,7 @@ export type WireguardActionMessage = WireguardAction | ActionError;
 export type CachedIpActionMessage = CachedIpAction | ActionError;
 export type TemplatesActionMessage = EmptyAction | ActionError;
 export type PatchingActionMessage = EmptyAction | ActionError;
+export type DeleteStateActionMessage = EmptyAction | ActionError;
 
 export const appAction = async (): Promise<AppConfig> => {
   const resp = await invoke<AppActionMessage>("app_config", {});
@@ -119,6 +120,14 @@ export const templatesAction = async (
 
 export const patchingAction = async (password: string): Promise<void> => {
   const resp = await invoke<TemplatesActionMessage>("patch_system", {password});
+
+  if (resp.type === "error") {
+    throw new Error(resp.message);
+  }
+};
+
+export const deleteStateAction = async (): Promise<void> => {
+  const resp = await invoke<DeleteStateActionMessage>("delete_state");
 
   if (resp.type === "error") {
     throw new Error(resp.message);
