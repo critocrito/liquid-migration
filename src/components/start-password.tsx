@@ -29,7 +29,7 @@ const StartPassword = ({
             htmlFor="password"
             className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
           >
-            Password
+            Administrator Password
           </label>
           <div className="mt-1 sm:col-span-2 sm:mt-0">
             <input
