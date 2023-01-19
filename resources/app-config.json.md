@@ -12,6 +12,7 @@ The `app-config.json` is read at compile time and parameterizes the client to a 
 - `server.network` (required): The IPv4 CIDR of allowed IPs, e.g. 10.0.1.0/24.
 - `server.endpoint` (required): The public IPv4 Address of the VPN endpoint.
 - `server.public_key` (required): The Wireguard public key of the VPN server.
+- `server.port` (optional): The port of the wireguard server. Defaults to 51820.
 
 ## Client
 
