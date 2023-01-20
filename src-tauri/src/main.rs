@@ -220,6 +220,13 @@ fn patch_system(password: &str, state: State<AppState>) -> PatchSystemMessage {
         };
     }
 
+    println!("sudo_chmod wg0.conf");
+    if let Err(e) = cmd::sudo_chmod(password, &state.cfg.client.wg_config, "0600") {
+        return PatchSystemMessage::CommandError {
+            message: e.to_string(),
+        };
+    }
+
     println!("sudo_service_restart");
     if let Err(e) = cmd::sudo_service_restart(password, "ferm") {
         return PatchSystemMessage::CommandError {

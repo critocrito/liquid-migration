@@ -313,3 +313,33 @@ pub(crate) fn sudo_wg_up(_password: &str) -> Result<(), CmdError> {
     std::thread::sleep(std::time::Duration::from_millis(1000));
     Ok(())
 }
+
+pub(crate) fn sudo_chmod(password: &str, target: &str, mode: &str) -> Result<(), CmdError> {
+    println!("chmod {} {}", mode, target);
+
+    let mut child = Command::new("sudo")
+        .arg("-S")
+        .arg("-k")
+        .arg("chmod")
+        .arg(mode)
+        .arg(target)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()?;
+
+    let child_stdin = child.stdin.as_mut();
+    if let Some(stdin) = child_stdin {
+        stdin.write_all(password.as_bytes())?;
+        stdin.write_all(b"\n")?;
+    }
+
+    let output = child.wait_with_output()?;
+
+    if output.status.success() {
+        Ok(())
+    } else {
+        Err(CmdError::Sudo(
+            String::from_utf8_lossy(&output.stderr).to_string(),
+        ))
+    }
+}
