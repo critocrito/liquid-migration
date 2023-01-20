@@ -279,6 +279,10 @@ pub(crate) fn sudo_modprobe(_password: &str, module: &str) -> Result<(), CmdErro
 
 #[cfg(target_os = "linux")]
 pub(crate) fn sudo_wg_up(password: &str) -> Result<String, CmdError> {
+    if sudo_is_wireguard_up(password)? {
+        return Ok("Wireguard is already running.".to_string());
+    }
+
     let mut child = Command::new("sudo")
         .arg("-S")
         .arg("-k")
@@ -341,5 +345,36 @@ pub(crate) fn sudo_chmod(password: &str, target: &str, mode: &str) -> Result<(),
         Err(CmdError::Sudo(
             String::from_utf8_lossy(&output.stderr).to_string(),
         ))
+    }
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn sudo_is_wireguard_up(password: &str) -> Result<bool, CmdError> {
+    println!("sudo wg show wg0");
+
+    let mut child = Command::new("sudo")
+        .arg("-S")
+        .arg("-k")
+        .arg("wg")
+        .arg("show")
+        .arg("wg0")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()?;
+
+    let child_stdin = child.stdin.as_mut();
+    if let Some(stdin) = child_stdin {
+        stdin.write_all(password.as_bytes())?;
+        stdin.write_all(b"\n")?;
+    }
+
+    let output = child.wait_with_output()?;
+
+    if output.status.success() {
+        println!("Wiregurad already running.");
+        Ok(true)
+    } else {
+        println!("Wiregurad is not running.");
+        Ok(false)
     }
 }
