@@ -20,7 +20,7 @@ apt install libwebkit2gtk-4.0-dev \
 adduser build
 ```
 
-Continue as the `build user`:
+Continue as the `build` user:
 
 ```sh
 # Install Rust
@@ -31,7 +31,7 @@ rustc --version
 # Install node
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
 $SHELL   # Open a new shell to load nvm
-nvm instll 16
+nvm install 16
 
 # Get the source code, copy the ssh public key to the Github deploy keys
 ssh-keygen -o -a 100 -t ed25519 -f ~/.ssh/id_ed25519 -C "build@liquid-migration"
@@ -55,7 +55,7 @@ cat <<EOF >> resources/app-config.json
 cargo tauri build
 ```
 
-The binary can be found in `target/release`:
+The build outputs can be found in `src-tauri/target/release`:
 
 ```sh
 ls -l src-tauri/target/release/bundle/app-image
