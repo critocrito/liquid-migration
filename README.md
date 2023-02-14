@@ -4,42 +4,61 @@
 
 ## Installation
 
-Install a recent version of the the Rust compiler (minimum 1.57). The recommended way to install Rust is by using [`rustup`](https://rustup.rs).
+To prepare the build environment start as root on a fresh Debian 11 installation:
 
 ```sh
+apt update
+apt install libwebkit2gtk-4.0-dev \
+    build-essential \
+    curl \
+    wget \
+    libssl-dev \
+    libgtk-3-dev \
+    libayatana-appindicator3-dev \
+    librsvg2-dev \
+    git-core
+adduser build
+```
+
+Continue as the `build user`:
+
+```sh
+# Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
 rustc --version
-```
 
-Also setup the [Tauri](https://tauri.app) toolchain.
+# Install node
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+$SHELL   # Open a new shell to load nvm
+nvm instll 16
 
-```sh
+# Get the source code, copy the ssh public key to the Github deploy keys
+ssh-keygen -o -a 100 -t ed25519 -f ~/.ssh/id_ed25519 -C "build@liquid-migration"
+
+# Build the app
 cargo install tauri-cli
-```
-
-And install the [NodeJS compiler](https://nodejs.org/en/download/) and dependencies:
-
-```sh
-cd liquid-migrations
+git clone git@github.com:critocrito/liquid-migration.git
+cd liquid-migration
 npm install
-```
-
-During development run:
-
-```sh
-cargo tauri dev
-```
-
-Build the production release using the following command:
-
-```sh
+cat <<EOF >> resources/app-config.json
+> {
+  "project": "E",
+  "server": {
+    "host": "10.0.11.1",
+    "network": "10.0.11.0/24",
+    "endpoint": "23.23.23.23",
+    "public_key": "<pub key>"
+  }
+}
+> EOF
 cargo tauri build
 ```
 
 The binary can be found in `target/release`:
 
 ```sh
-ls -l target/release/liquid-migration
+ls -l src-tauri/target/release/bundle/app-image
 ```
 
 ## Development
