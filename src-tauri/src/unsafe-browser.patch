@@ -4,7 +4,7 @@
  echo '127.0.0.42 firefox.settings.services.mozilla.com' \
       >> "$\{CHROOT}"/etc/hosts
  
-+echo '{ host }      liquidvpn.home.arpa hoover.liquidvpn.home.arpa dokuwiki.liquidvpn.home.arpa rocketchat.liquidvpn.home.arpa nextcloud.liquidvpn.home.arpa codimd.liquidvpn.home.arpa' >> "$\{CHROOT}"/etc/hosts
++echo '{ host }      { servername }.home.arpa hoover.{ servername }.home.arpa dokuwiki.{ servername }.home.arpa rocketchat.{ servername }.home.arpa nextcloud.{ servername }.home.arpa codimd.{ servername }.home.arpa wikijs.{ servername }.home.arpa' >> "$\{CHROOT}"/etc/hosts
 +
  echo "* Starting Unsafe Browser"
  # Do not localize the 5th argument: it becomes WM_CLASS and then GNOME

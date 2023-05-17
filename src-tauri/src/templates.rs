@@ -32,6 +32,7 @@ struct FermTemplateContext {
 #[derive(Serialize)]
 struct BrowserTemplateContext {
     host: String,
+    servername: String,
 }
 
 pub fn wg_config(
@@ -74,12 +75,13 @@ pub fn ferm_patch(endpoint: &Ipv4Addr) -> Result<String, TemplateError> {
     Ok(rendered)
 }
 
-pub fn browser_patch(host: &Ipv4Addr) -> Result<String, TemplateError> {
+pub fn browser_patch(host: &Ipv4Addr, servername: &str) -> Result<String, TemplateError> {
     let mut tt = TinyTemplate::new();
     tt.add_template("hello", BROWSER_TEMPLATE)?;
 
     let context = BrowserTemplateContext {
         host: host.to_string(),
+        servername: servername.to_string(),
     };
 
     let rendered = tt.render("hello", &context)?;

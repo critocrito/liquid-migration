@@ -27,6 +27,10 @@ fn default_port() -> String {
     "51820".to_string()
 }
 
+fn default_servername() -> String {
+    "liquidvpn".to_string()
+}
+
 fn default_ferm() -> String {
     "/etc/ferm/ferm.conf".to_string()
 }
@@ -49,6 +53,8 @@ pub(crate) struct Server {
     pub(crate) endpoint: Ipv4Addr,
     #[serde(default = "default_port")]
     pub(crate) port: String,
+    #[serde(default = "default_servername")]
+    pub(crate) servername: String,
     pub(crate) public_key: String,
     pub(crate) network: String,
 }

@@ -5,6 +5,7 @@
     "network": "10.0.1.0/24",
     "endpoint": "9.9.9.9",
     "port": "51820",
+    "servername": "liquidvpn",
     "public_key": "my-public-key"
   },
   "client": {

@@ -13,6 +13,7 @@ The `app-config.json` is read at compile time and parameterizes the client to a 
 - `server.endpoint` (required): The public IPv4 Address of the VPN endpoint.
 - `server.public_key` (required): The Wireguard public key of the VPN server.
 - `server.port` (optional): The port of the wireguard server. Defaults to 51820.
+- `server.servername`(optional): The name of the Liquid server. Defaults to liquidvpn.
 
 ## Client
 
