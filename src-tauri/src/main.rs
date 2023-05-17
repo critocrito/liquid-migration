@@ -105,7 +105,6 @@ fn templates(pubkey: &str, privkey: &str, ipaddr: &str, state: State<AppState>) 
         &state.cfg.server.host,
         &state.cfg.server.endpoint,
         &state.cfg.server.port,
-        &state.cfg.server.servername,
         &state.cfg.server.network,
         ipaddr,
     ) {
@@ -126,7 +125,7 @@ fn templates(pubkey: &str, privkey: &str, ipaddr: &str, state: State<AppState>) 
         }
     };
 
-    let browser_template = match templates::browser_patch(&state.cfg.server.host) {
+    let browser_template = match templates::browser_patch(&state.cfg.server.host, &state.cfg.server.servername) {
         Ok(tmpl) => tmpl,
         Err(e) => {
             return TemplateMessage::CommandError {
