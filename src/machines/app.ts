@@ -1,20 +1,16 @@
-import {actions, assign, createMachine, DoneInvokeEvent, send} from "xstate";
+import {assign, createMachine, DoneInvokeEvent} from "xstate";
 
-import {appAction, deleteStateAction, hostAction} from "$lib/actions";
+import {appAction, deleteStateAction} from "$lib/actions";
 import type {AppConfig, ClientConfig, ServerConfig} from "$lib/types";
-
-const {choose} = actions;
 
 type Context = {
   project?: string;
   client?: ClientConfig;
   server?: ServerConfig;
-  isHostReady: boolean;
   error?: string;
 };
 
 type Event =
-  | {type: "POLL"}
   | {type: "OK"}
   | {type: "EDIT"}
   | {type: "SAVE"; config: AppConfig}
@@ -46,7 +42,7 @@ export default createMachine(
 
     initial: "loading",
 
-    context: {isHostReady: false},
+    context: {},
 
     predictableActionArguments: true,
 
@@ -55,36 +51,13 @@ export default createMachine(
         invoke: {
           src: "loadConfig",
           onDone: {
-            target: "verifyHost",
+            target: "loaded",
             actions: "setConfig",
           },
           onError: {
             target: "error",
             actions: "fail",
           },
-        },
-      },
-
-      verifyHost: {
-        invoke: {
-          src: "verifyHost",
-          onDone: {
-            target: "pollHost",
-            actions: "isPolling",
-          },
-          onError: {
-            target: "error",
-            actions: "fail",
-          },
-        },
-      },
-
-      pollHost: {
-        entry: "pollHost",
-
-        on: {
-          POLL: {target: "verifyHost"},
-          OK: {target: "loaded"},
         },
       },
 
@@ -137,13 +110,6 @@ export default createMachine(
         client: event.data.client,
       })),
 
-      isPolling: assign({isHostReady: (_ctx, event) => event.data === "ok"}),
-
-      pollHost: choose([
-        {cond: (ctx) => ctx.isHostReady, actions: send("OK")},
-        {actions: send("POLL", {delay: 1000})},
-      ]),
-
       fail: assign({
         error: (_ctx, ev) => {
           const {data} = ev as DoneInvokeEvent<Error>;
@@ -154,8 +120,6 @@ export default createMachine(
 
     services: {
       loadConfig: appAction,
-
-      verifyHost: hostAction,
 
       deleteState: deleteStateAction,
     },

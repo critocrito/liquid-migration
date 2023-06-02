@@ -65,8 +65,8 @@ export const appAction = async (): Promise<AppConfig> => {
   };
 };
 
-export const hostAction = async (): Promise<"ok" | "poll"> => {
-  const resp = await invoke<HostActionMessage>("host_setup", {});
+export const hostAction = async (password: string): Promise<"ok" | "poll"> => {
+  const resp = await invoke<HostActionMessage>("host_setup", {password});
 
   if (resp.type === "error") {
     throw new Error(resp.message);

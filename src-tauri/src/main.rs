@@ -125,14 +125,15 @@ fn templates(pubkey: &str, privkey: &str, ipaddr: &str, state: State<AppState>) 
         }
     };
 
-    let browser_template = match templates::browser_patch(&state.cfg.server.host, &state.cfg.server.servername) {
-        Ok(tmpl) => tmpl,
-        Err(e) => {
-            return TemplateMessage::CommandError {
-                message: e.to_string(),
+    let browser_template =
+        match templates::browser_patch(&state.cfg.server.host, &state.cfg.server.servername) {
+            Ok(tmpl) => tmpl,
+            Err(e) => {
+                return TemplateMessage::CommandError {
+                    message: e.to_string(),
+                }
             }
-        }
-    };
+        };
 
     if let Err(e) = fs::create_dir(&state.cfg.client.cfg_dir) {
         if e.kind() != ErrorKind::AlreadyExists {
@@ -167,7 +168,7 @@ fn app_config(state: State<AppState>) -> AppConfigMessage {
 }
 
 #[tauri::command]
-fn host_setup() -> HostSetupMessage {
+fn host_setup(_password: &str) -> HostSetupMessage {
     match cmd::verify_wireguard_pkg() {
         Ok(_) => HostSetupMessage::Setup,
         Err(_) => HostSetupMessage::Poll,

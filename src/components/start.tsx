@@ -20,7 +20,11 @@ const Start = ({onCancel}: StartProps) => {
 
   useServiceLogger(service, machine.id);
 
-  if (state.matches("patchingSystem")) {
+  if (
+    state.matches("patchingSystem") ||
+    state.matches("verifyHost") ||
+    state.matches("pollHost")
+  ) {
     return <Bootstrap />;
   }
 

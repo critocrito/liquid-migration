@@ -1,16 +1,21 @@
-import {assign, createMachine, DoneInvokeEvent} from "xstate";
+import {actions, assign, createMachine, DoneInvokeEvent, send} from "xstate";
 
-import {patchingAction} from "$lib/actions";
+import {hostAction, patchingAction} from "$lib/actions";
+
+const {choose} = actions;
 
 type Context = {
   password: string;
+  isHostReady: boolean;
   error?: string;
 };
 type Event =
   | {type: "STORE_PASSWORD"; password: string}
   | {type: "NEXT"}
   | {type: "FAIL"; error: string}
-  | {type: "RESET"};
+  | {type: "RESET"}
+  | {type: "OK"}
+  | {type: "POLL"};
 
 export default createMachine(
   {
@@ -32,7 +37,7 @@ export default createMachine(
 
     initial: "init",
 
-    context: {password: ""},
+    context: {password: "", isHostReady: false},
 
     states: {
       init: {
@@ -45,9 +50,32 @@ export default createMachine(
       password: {
         on: {
           STORE_PASSWORD: {
-            target: "patchingSystem",
+            target: "verifyHost",
             actions: "assignPassword",
           },
+        },
+      },
+
+      verifyHost: {
+        invoke: {
+          src: "verifyHost",
+          onDone: {
+            target: "pollHost",
+            actions: "isPolling",
+          },
+          onError: {
+            target: "error",
+            actions: "fail",
+          },
+        },
+      },
+
+      pollHost: {
+        entry: "pollHost",
+
+        on: {
+          POLL: {target: "verifyHost"},
+          OK: {target: "patchingSystem"},
         },
       },
 
@@ -86,13 +114,23 @@ export default createMachine(
 
       resetPassword: assign({
         password: () => "",
+        isHostReady: () => false,
       }),
 
       assignPassword: assign({password: (_ctx, event) => event.password}),
+
+      isPolling: assign({isHostReady: (_ctx, event) => event.data === "ok"}),
+
+      pollHost: choose([
+        {cond: (ctx) => ctx.isHostReady, actions: send("OK")},
+        {actions: send("POLL", {delay: 1000})},
+      ]),
     },
 
     services: {
       patchingSystem: async (ctx) => patchingAction(ctx.password),
+
+      verifyHost: async (ctx) => hostAction(ctx.password),
     },
   },
 );

@@ -18,12 +18,7 @@ const App = () => {
 
   useServiceLogger(service, machine.id);
 
-  if (
-    state.matches("loading") ||
-    state.matches("verifyHost") ||
-    state.matches("pollHost") ||
-    state.matches("deleteState")
-  )
+  if (state.matches("loading") || state.matches("deleteState"))
     return <Bootstrap />;
 
   if (state.matches("loaded"))
