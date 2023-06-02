@@ -23,7 +23,8 @@ const Start = ({onCancel}: StartProps) => {
   if (
     state.matches("patchingSystem") ||
     state.matches("verifyHost") ||
-    state.matches("pollHost")
+    state.matches("pollHost") ||
+    state.matches("hostIntermediary")
   ) {
     return <Bootstrap />;
   }

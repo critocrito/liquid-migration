@@ -378,3 +378,82 @@ pub(crate) fn sudo_is_wireguard_up(password: &str) -> Result<bool, CmdError> {
         Ok(false)
     }
 }
+
+#[cfg(target_os = "linux")]
+pub(crate) fn sudo_update_sources(password: &str) -> Result<(), CmdError> {
+    println!("sudo apt update");
+
+    let mut child = Command::new("sudo")
+        .arg("-S")
+        .arg("-k")
+        .arg("apt")
+        .arg("update")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()?;
+
+    let child_stdin = child.stdin.as_mut();
+    if let Some(stdin) = child_stdin {
+        stdin.write_all(password.as_bytes())?;
+        stdin.write_all(b"\n")?;
+    }
+
+    let output = child.wait_with_output()?;
+
+    if output.status.success() {
+        println!("Sources updated.");
+        Ok(())
+    } else {
+        Err(CmdError::Sudo(
+            String::from_utf8_lossy(&output.stderr).to_string(),
+        ))
+    }
+}
+
+#[cfg(target_os = "macos")]
+pub(crate) fn sudo_update_sources(_password: &str) -> Result<(), CmdError> {
+    println!("updating sources");
+
+    std::thread::sleep(std::time::Duration::from_millis(1000));
+    Ok(())
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn sudo_install_pkg(password: &str, pkg: &str) -> Result<(), CmdError> {
+    println!("sudo apt update");
+
+    let mut child = Command::new("sudo")
+        .arg("-S")
+        .arg("-k")
+        .arg("apt")
+        .arg("install")
+        .arg(pkg)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()?;
+
+    let child_stdin = child.stdin.as_mut();
+    if let Some(stdin) = child_stdin {
+        stdin.write_all(password.as_bytes())?;
+        stdin.write_all(b"\n")?;
+    }
+
+    let output = child.wait_with_output()?;
+
+    if output.status.success() {
+        println!("Package {} installed.", pkg);
+        Ok(())
+    } else {
+        Err(CmdError::Sudo(
+            String::from_utf8_lossy(&output.stderr).to_string(),
+        ))
+    }
+}
+
+#[cfg(target_os = "macos")]
+pub(crate) fn sudo_install_pkg(_password: &str, _pkg: &str) -> Result<(), CmdError> {
+    println!("updating sources");
+
+    std::thread::sleep(std::time::Duration::from_millis(1000));
+    Ok(())
+}

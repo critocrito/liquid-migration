@@ -50,9 +50,15 @@ export default createMachine(
       password: {
         on: {
           STORE_PASSWORD: {
-            target: "verifyHost",
+            target: "hostIntermediary",
             actions: "assignPassword",
           },
+        },
+      },
+
+      hostIntermediary: {
+        on: {
+          always: [{target: "verifyHost", cond: () => true}],
         },
       },
 

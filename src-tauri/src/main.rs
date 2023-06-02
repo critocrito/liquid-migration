@@ -28,6 +28,8 @@ enum HostSetupMessage {
     Setup,
     #[serde(rename = "waiting")]
     Poll,
+    #[serde(rename = "error")]
+    CommandError { message: String },
 }
 
 #[derive(Debug, Serialize)]
@@ -168,10 +170,26 @@ fn app_config(state: State<AppState>) -> AppConfigMessage {
 }
 
 #[tauri::command]
-fn host_setup(_password: &str) -> HostSetupMessage {
+fn host_setup(password: &str) -> HostSetupMessage {
     match cmd::verify_wireguard_pkg() {
         Ok(_) => HostSetupMessage::Setup,
-        Err(_) => HostSetupMessage::Poll,
+        Err(_) => {
+            println!("update sources");
+            if cmd::sudo_update_sources(password).is_err() {
+                return HostSetupMessage::CommandError {
+                    message: "Failed to update sources.".to_string(),
+                };
+            }
+
+            println!("install wireguard");
+            if cmd::sudo_install_pkg(password, "wireguard").is_err() {
+                return HostSetupMessage::CommandError {
+                    message: "Failed to update sources.".to_string(),
+                };
+            }
+
+            HostSetupMessage::Setup
+        }
     }
 }
 
